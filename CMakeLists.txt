@@ -26,6 +26,14 @@ include_directories(include)
 
 add_definitions(-DFFI_BUILDING)
 
+if(MSVC)
+    add_compile_options(
+        $<$<CONFIG:>:/MT> #---------|
+        $<$<CONFIG:Debug>:/MTd> #---|-- Statically link the runtime libraries
+        $<$<CONFIG:Release>:/MT> #--|
+    )
+endif()
+
 add_library(objlib OBJECT ${SOURCES_LIST})
 set_property(TARGET objlib PROPERTY POSITION_INDEPENDENT_CODE 1)
 
@@ -42,6 +50,13 @@ add_library(ffi_shared SHARED $<TARGET_OBJECTS:objlib> ${OBJECTS_LIST})
 set_target_properties(ffi_static PROPERTIES OUTPUT_NAME ffi)
 set_target_properties(ffi_shared PROPERTIES OUTPUT_NAME ffi)
 
+set(prefix "\"${CMAKE_INSTALL_PREFIX}\"")
+set(exec_prefix "\${prefix}/bin")
+set(includedir "\${prefix}/include")
+set(libdir "\${prefix}/lib")
+set(toolexeclibdir "\${prefix}/lib")
+configure_file(libffi.pc.in libffi.pc @ONLY)
+
 install(TARGETS ffi_static ffi_shared
     EXPORT ${PROJECT_NAME}Targets
     RUNTIME DESTINATION bin
@@ -55,3 +70,7 @@ install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/include/ffi.h
     ${CMAKE_CURRENT_BINARY_DIR}/include/ffitarget.h
     DESTINATION include)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/libffi.pc
+    DESTINATION pkgconfig)
