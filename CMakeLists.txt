@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.8)
+cmake_minimum_required(VERSION 3.7.2)
 project(libffi C)
 
 set(SOURCES_LIST
